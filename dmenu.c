@@ -62,8 +62,6 @@ static Clr *scheme[SchemeLast];
 static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 static char *(*fstrstr)(const char *, const char *) = strstr;
 
-char *sep = '\n';
-
 static void
 appenditem(struct item *item, struct item **list, struct item **last)
 {
@@ -578,16 +576,30 @@ insert:
 			return;
 		/* fallthrough */
 	case XK_Up:
-		if (sel && sel->left && (sel = sel->left)->right == curr) {
-			curr = prev;
-			calcoffsets();
-		}
+        if (sel) {
+            if (sel->left) {
+                if ((sel = sel->left)->right == curr) {
+                    curr = prev;
+                    calcoffsets();
+                }
+            }
+            else {
+                if (next) {
+                    curr = matchend;
+                    calcoffsets();
+                    curr = prev;
+                    calcoffsets();
+                    for (; next && (curr = curr->right); calcoffsets());
+                }
+                sel = matchend;
+            }
+        }
 		break;
 	case XK_Next:
 		if (!next)
-			return;
-		sel = curr = next;
-		calcoffsets();
+            return;
+        sel = curr = next;
+        calcoffsets();
 		break;
 	case XK_Prior:
 		if (!prev)
@@ -614,9 +626,17 @@ insert:
 			return;
 		/* fallthrough */
 	case XK_Down:
-		if (sel && sel->right && (sel = sel->right) == next) {
-			curr = next;
-			calcoffsets();
+		if (sel) {
+            if (sel->right) {
+                if ((sel = sel->right) == next) {
+                    curr = next;
+                    calcoffsets();
+                }
+            }
+            else {
+                sel = curr = matches;
+                calcoffsets();
+            }
 		}
 		break;
 	case XK_Tab:
@@ -877,8 +897,6 @@ main(int argc, char *argv[])
 			colors[SchemeSelHighlight][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
-        else if (!strcmp(argv[i], "-sep"))
-            sep = argv[++i];
 		else
 			usage();
 
