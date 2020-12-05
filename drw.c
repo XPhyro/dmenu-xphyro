@@ -7,6 +7,7 @@
 
 #include "drw.h"
 #include "util.h"
+#include "drwconfig.h"
 
 #define UTF_INVALID 0xFFFD
 #define UTF_SIZ     4
@@ -298,7 +299,11 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 						nextfont = curfont;
 					}
 					break;
-				}
+				} else if (skipnonprnt) {
+                    utf8strlen += utf8charlen;
+                    text += utf8charlen;
+                    charexists = 1;
+                }
 			}
 
 			if (!charexists || nextfont)
