@@ -60,6 +60,7 @@ static Clr *scheme[SchemeLast];
 #include "config.h"
 
 int skipnonprnt = 0;
+int printcount = 0;
 
 static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 static char *(*fstrstr)(const char *, const char *) = strstr;
@@ -442,6 +443,7 @@ keypress(XKeyEvent *ev)
 {
 	char buf[32];
 	int len;
+    static int printed = 0;
 	KeySym ksym;
 	Status status;
 
@@ -612,7 +614,7 @@ insert:
 	case XK_Return:
 	case XK_KP_Enter:
 		puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
-		if (!(ev->state & ControlMask)) {
+		if (!(ev->state & ControlMask) || (printcount && ++printed == printcount)) {
 			cleanup();
 			exit(0);
 		}
@@ -880,6 +882,8 @@ main(int argc, char *argv[])
 			fuzzy = 0;
 		else if (!strcmp(argv[i], "-snp")) /* skips non-printable chars (or chars that do not exist in font */
 			skipnonprnt = 1;
+		else if (!strcmp(argv[i], "-pc")) /* allow printing this many lines */
+			printcount = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
@@ -912,7 +916,7 @@ main(int argc, char *argv[])
 			colors[SchemeSelHighlight][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
-		else if (!strcmp(argv[i], "-n"))   /* preselected item */
+		else if (!strcmp(argv[i], "-sel"))   /* preselected item */
 			preselected = atoi(argv[++i]);
 		else
 			usage();
