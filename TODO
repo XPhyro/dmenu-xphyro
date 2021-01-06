@@ -1,0 +1,8 @@
+BUGS
+====
+- The option -snp also omits the searches in the defined fonts, rather than only omitting the searches in the user's system that are not pre-defined in config.h, fix.
+
+FEATURES
+========
+- Add an option for limiting the text search to start from the beginning of the item, i.e. the line.
+- Add wildcard and/or regex support.
